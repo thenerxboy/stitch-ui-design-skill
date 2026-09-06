@@ -1,14 +1,14 @@
 ---
 name: stitch-ui-skill
-description: End-to-end framework for extracting UI reference screens into color-agnostic JSON blueprints, maintaining brand design tokens & locked component specs, saving approved screen prompts to app-screens/, and compiling domain-adapted Google Stitch prompts with 9:16 mobile canvas guardrails.
+description: End-to-end framework for extracting UI reference screens into color-agnostic JSON blueprints, maintaining brand design tokens & locked component specs, saving approved screen prompts to app-screens/, compiling domain-adapted Google Stitch prompts, and generating Dual-Prompt specs for App Icons and App Store Screenshots with zero dummy text guardrails.
 ---
 
 # 🎨 Google Stitch UI Design & Prompt Compilation Skill (`stitch-ui-skill`)
 
-This skill defines the complete, 3-tier architecture and execution workflow for extracting reference UI screenshots, cataloging color-agnostic visual blueprints, applying brand themes, archiving approved screen prompts into `app-screens/`, and compiling domain-adapted Google Stitch prompts.
+This skill defines the complete, 3-tier architecture and execution workflow for extracting reference UI screenshots, cataloging color-agnostic visual blueprints in `design_catalog.json`, applying brand themes in `app_theme.json`, archiving approved screen prompts into `app-screens/`, compiling domain-adapted Google Stitch prompts via `scripts/stitch_formatter.js`, and tracking UI design state in `docs/04-ui-design/DESIGN-MEMORY.md`.
 
 > [!IMPORTANT]
-> **AGENT MANDATE**: Any agent executing a UI extraction, design system setup, or Google Stitch prompt compilation task **MUST ALWAYS read this SKILL.md file first** (`view_file`) to adhere to the PRD & Component-First Execution Protocol, Design Guardrails, and Error Prevention Checklist.
+> **AGENT MANDATE**: Any agent executing a UI extraction, design system setup, or generative prompt compilation task **MUST ALWAYS read this SKILL.md file first** (`view_file`) to adhere to the PRD & Component-First Execution Protocol, Design Guardrails, Hardcoded Output Prompt Standards, Zero Dummy Text Enforcement, and Dedicated UI Design Memory (`docs/04-ui-design/DESIGN-MEMORY.md`).
 
 ---
 
@@ -16,50 +16,75 @@ This skill defines the complete, 3-tier architecture and execution workflow for 
 
 When the user types any of the following shortcuts or asks for help, the agent must execute the corresponding action:
 
-| Command / Shortcut | Action / Behavior |
-| :--- | :--- |
-| **`/ui-help`** | Displays a complete manual overview: what the skill does, file explanations (`app_theme.json`, `design_catalog.json`, `stitch_formatter.js`, `app-screens/`), workflow phases, CLI flags, and rules. |
-| **`/ui-shortcuts`** | Displays a fast reference list of all available `/ui-*` shortcut triggers and what they do. |
-| **`/ui-init`** | Auto-creates `app_theme.json`, `design_catalog.json`, `stitch_formatter.js`, and `app-screens/` folder in the current project root. |
-| **`/ui-extract`** | Extracts attached reference screenshot into a color-agnostic JSON blueprint and appends it to `design_catalog.json`. |
-| **`/ui-compile`** | Compiles a Stitch prompt for a specific screen with domain adaptation (`--app_domain`). |
-| **`/ui-sync`** | Batch compiles & updates ALL archived screen prompts in `app-screens/` to reflect global theme/component changes (`node stitch_formatter.js --all`). |
-| **`/ui-approve`** | Saves the current approved Google Stitch prompt into `app-screens/<screen_id>.md`. |
+| Command / Shortcut | Action / Behavior | Output Prompt Standard |
+| :--- | :--- | :--- |
+| **`/ui-help`** | Displays a complete manual overview: what the skill does, file explanations (`app_theme.json`, `design_catalog.json`, `scripts/stitch_formatter.js`, `app-screens/`, `docs/04-ui-design/DESIGN-MEMORY.md`), workflow phases, CLI flags, and rules. | Summary Text |
+| **`/ui-shortcuts`** | Displays a fast reference list of all available `/ui-*` shortcut triggers and what they do. | Summary Text |
+| **`/ui-flow`** | Generates UI screen prompt blueprints organized by single user flow (Onboarding & Auth, Activation & Paywall, Main App Tabs, Happy Path Core Loop). Ingests `docs/` for real copy. | **Google Stitch Prompt ONLY** |
+| **`/app-icon`** | Generates 5 distinct logo exploration concept canvases (Mascot, Metaphor, Lettermark, Geometric, Wordmark) for the app brand. | **Dual-Prompt Standard** (Variant A: Stitch + Variant B: ChatGPT / Midjourney) |
+| **`/app-screenshots`** | Generates 5 panoramic App Store marketing screenshots + 1 Next.js web storefront hero mockup screen (`shots.so` framing). | **Dual-Prompt Standard** (Variant A: Stitch + Variant B: ChatGPT / Midjourney) |
+| **`/ui-init`** | Auto-creates `app_theme.json`, `design_catalog.json`, `app-screens/` folder, and `docs/04-ui-design/DESIGN-MEMORY.md` in current project root. | Operations Script |
+| **`/ui-extract`** | Extracts attached reference screenshot into color-agnostic JSON blueprint via `scripts/add_catalog_blueprint.js` and appends to `design_catalog.json`. | Catalog Blueprint JSON |
+| **`/ui-compile`** | Compiles a Stitch prompt for a specific screen from `design_catalog.json` with domain adaptation (`node scripts/stitch_formatter.js --app_domain`). | **Google Stitch Prompt ONLY** |
+| **`/ui-sync`** | Batch compiles & updates ALL archived screen prompts in `app-screens/` to reflect global theme changes (`node scripts/stitch_formatter.js --all`). | Formatter Sync |
+| **`/ui-approve`** | Saves current approved Google Stitch prompt into `app-screens/prompts/<screen_id>.md` and updates `docs/04-ui-design/DESIGN-MEMORY.md`. | Markdown File Archive |
+
+---
+
+## 📄 PRD Content Extraction Mandate (Zero Dummy Text Rule)
+
+When compiling UI screens (`/ui-flow`), App Icons (`/app-icon`), or Storefront Screenshots (`/app-screenshots`), the agent **MUST INGEST** the authoritative documentation files in the project workspace:
+- `docs/01-app-brief/APP-BRIEF.md` (Product Identity, Mascot, Colors, Copy & Vibe)
+- `docs/02-prd-research/ARCH-PRD.md` (Features, JTBD, Monorepo, Onboarding Carousel, Paywall, Permissions)
+- `docs/03-tech-stack/app-features.md` (Feature-First Stack Decomposition)
+- `docs/03-tech-stack/TECH-STACK.md` (Monorepo Infrastructure & DB Schemas)
+
+### Strict Copy Directives:
+1. **Real Domain Copy Only**: All titles, labels, card descriptions, stat counters, badge microcopy, and button text MUST be pulled directly from the PRD or adapted to the app's real domain.
+2. **Zero Placeholder String Policy**: Absolutely NO "Lorem Ipsum", "John Doe", "$99", "Sample User", "Feature Title 1", "Lorem dolor sit amet", or generic placeholders.
+3. **Exact Brand Theme Alignment**: Use the exact Hex codes, color tokens, and Google Fonts pairings defined in `app_theme.json` and `APP-BRIEF.md`.
 
 ---
 
 ## 🏛️ System Architecture & File Structure
 
 ```
-+-------------------------------------------------------+
-| Tier 1: Reference UI Extraction (design_catalog.json) |
-| Color-agnostic structural layout & hand-curated specs |
-+-------------------------------------------------------+
-                           │
-                           ▼
-+-------------------------------------------------------+
-| Tier 2: App Brand System (app_theme.json)             |
-| Color tokens, theme profiles & locked nav bar specs   |
-+-------------------------------------------------------+
-                           │
-                           ▼
-+-------------------------------------------------------+
-| Tier 3: Prompt Compiler (stitch_formatter.js)         |
-| Outputs domain-adapted Stitch prompt with guardrails   |
-+-------------------------------------------------------+
-                           │
-                           ▼
-+-------------------------------------------------------+
-| Tier 4: Approved Prompts Archive (app-screens/)       |
-| Permanent markdown files for approved screen prompts  |
-+-------------------------------------------------------+
++-----------------------------------------------------------------+
+| Tier 1: Reference UI Extraction (design_catalog.json)           |
+| Color-agnostic structural layout & hand-curated specs           |
++-----------------------------------------------------------------+
+                               │
+                               ▼
++-----------------------------------------------------------------+
+| Tier 2: App Brand System (app_theme.json)                       |
+| Color tokens, Google Fonts, SVG icon registry & navbar          |
++-----------------------------------------------------------------+
+                               │
+                               ▼
++-----------------------------------------------------------------+
+| Tier 3: Prompt Compiler (scripts/stitch_formatter.js)           |
+| Outputs domain-adapted Stitch prompt with guardrails             |
++-----------------------------------------------------------------+
+                               │
+                               ▼
++-----------------------------------------------------------------+
+| Tier 4: Approved Prompts Archive (app-screens/)                 |
+| Permanent markdown files for approved screen prompts            |
++-----------------------------------------------------------------+
+                               │
+                               ▼
++-----------------------------------------------------------------+
+| Tier 5: Dedicated UI Memory Log (docs/04-ui-design/DESIGN-MEMORY)|
+| Dedicated UI design system state & active screen version log    |
++-----------------------------------------------------------------+
 ```
 
 ### File Responsibilities:
-1. `design_catalog.json`: Holds color-agnostic UI layout blueprints for screens and hand-curated components.
-2. `app_theme.json`: Holds app brand design tokens, active theme profile, and locked foundational component specs.
-3. `stitch_formatter.js`: Node.js CLI script that injects theme colors, locked components, and domain adaptation directives into Stitch prompts.
-4. `app-screens/`: Project folder containing approved, production-ready markdown screen prompts (e.g. `app-screens/home_dashboard.md`).
+1. `design_catalog.json`: Holds color-agnostic UI layout blueprints for screens and hand-curated components extracted from reference screenshots or standard design patterns.
+2. `app_theme.json`: Holds app brand design tokens, active theme profile, Google Fonts pairings, and locked foundational component specs.
+3. `scripts/stitch_formatter.js`: Node.js CLI script inside skill directory that injects theme colors, locked components, and domain adaptation directives into Stitch prompts.
+4. `app-screens/`: Project folder containing approved, production-ready markdown screen prompts (`app-screens/prompts/`) and screenshots (`app-screens/images/`).
+5. `docs/04-ui-design/DESIGN-MEMORY.md`: Dedicated project-level UI design log tracking active theme, locked components, registered SVG icons, and screen versions. **Isolated from main agent memory to guarantee zero collisions.**
 
 ---
 
@@ -74,84 +99,59 @@ When starting a project or generating screens, follow this 4-phase protocol:
 ### Phase 1: Foundation Component Lock (No Forced Color Questions)
 - **Do NOT ask generic robotic color/vibe questions up front.**
 - Agent prompts the user:
-  > *"Before we start generating full screens, let's establish your foundational components (Nav Bar, Action Buttons, Headers). Do you have a reference image for the nav bar and buttons you want, or would you like me to propose a design based on your app brief?"*
+  > *"Before we start generating full screens, let me confirm your foundational components (Nav Bar, Action Buttons, Headers) from `app_theme.json` and `APP-BRIEF.md`. Do you have a reference image for the nav bar and buttons you want, or shall I propose a design based on your app brief?"*
 - Only after the user provides an image or approves a proposal are the foundational specs written to `app_theme.json` under `locked_navigation_bar` and primary action tokens.
 
-### Phase 2: Screen Generation Interview & On-Demand Themes
-For each screen in the PRD (e.g. *Home Dashboard*, *Task Detail*, *Analytics*, *User Profile*):
-1. **Agent Prompt**:
-   > *"For the **[Screen Name] Screen**, do you have a reference UI screenshot/inspiration image you'd like to use, or should I select and adapt the best layout blueprint from our catalog based on your PRD?"*
-2. **Branch A (Reference Image Provided)**: Extract visual blueprint into JSON $\rightarrow$ Append to `design_catalog.json` $\rightarrow$ Compile prompt.
-3. **Branch B (No Reference Image)**: Select best blueprint from `design_catalog.json` $\rightarrow$ Compile prompt.
+### Phase 2: Screen Generation Interview & Reference Image Selection
+For each screen in the PRD (e.g. *Home Feed*, *Streak Milestones*, *5s Video Shutter*, *Profile Settings*):
+1. **Agent Interview Prompt**:
+   > *"For the **[Screen Name] Screen**, do you have a reference UI screenshot / inspiration image you'd like me to extract and use, or should I select and adapt the best layout blueprint from our `design_catalog.json` based on your PRD?"*
+2. **Branch A (Reference Image Provided)**: Extract visual layout blueprint into JSON $\rightarrow$ Append color-agnostic structure to `design_catalog.json` via `scripts/add_catalog_blueprint.js` $\rightarrow$ Compile Google Stitch prompt using `app_theme.json` tokens.
+3. **Branch B (No Reference Image)**: Query `design_catalog.json` for matching `domain_tags` $\rightarrow$ Select best structural blueprint from `design_catalog.json` $\rightarrow$ Adapt domain copy from `docs/` $\rightarrow$ Compile prompt.
 4. **Single Active Theme Delivery**: Deliver ONE prompt matching the active theme. Do NOT spit out multiple theme variations simultaneously.
-5. **On-Demand Theme Variants**: Ask the user: *"Would you like to generate this screen in a different theme (e.g., Light Mode)?"* Only output alternate themes when requested.
+5. **On-Demand Theme Variants**: Ask the user: *"Would you like to generate this screen in a different theme (e.g., Clean Light Mode)?"* Only output alternate themes when requested.
 
 ### Phase 3: Screen Approval, Archiving & Versioning Protocol (`app-screens/`)
 - When the user approves a generated or revised Stitch prompt (*"This looks great"*, *"Approved"*, *"Good to go"*):
-  1. Ensures the `app-screens/` directory exists in the project root.
-  2. Saves/overwrites the screen prompt markdown file in `app-screens/` with the new standalone Stitch prompt, incrementing the version number in the filename and header (e.g. `home_daily_quote_feed_v1.md` ➔ `home_daily_quote_feed_v2.md` ➔ `home_daily_quote_feed_v3.md`).
+  1. Ensures `app-screens/prompts/` directory exists in the project root.
+  2. Saves/overwrites the screen prompt markdown file in `app-screens/prompts/<screen_id>.md`, incrementing version number in the header (e.g. `home_daily_streak_feed_v1.md` ➔ `home_daily_streak_feed_v2.md`).
+  3. Updates `docs/04-ui-design/DESIGN-MEMORY.md` to log active screen version.
 
 #### 📌 Rule: Approved Alterations & Single Active File Overwrite Mandate
 - When an already approved screen is altered and approved again:
-  - The previous version file (e.g. `home_daily_quote_feed_v5.md`) MUST BE DELETED/REPLACED by the newly approved file with the updated version suffix (`home_daily_quote_feed_v6.md`).
-  - There MUST NEVER be multiple version files (`_v1`, `_v2`, `_v3`...) or unversioned shortcut aliases coexisting in `app-screens/` for the same screen. At any given time, there is ONLY ONE SINGLE markdown file per screen in `app-screens/` representing its active version.
+  - The previous version file MUST BE DELETED/REPLACED by the newly approved file with the updated version suffix (`home_daily_streak_feed_v2.md`).
+  - There MUST NEVER be multiple version files (`_v1`, `_v2`, `_v3`...) coexisting in `app-screens/prompts/` for the same screen.
 
-#### 🎨 Rule A: On-Demand Theme Variant Archiving (Non-Destructive Copy)
-- When generating an alternate theme variant (e.g., Light Mode vs. Dark Mode) for an already approved screen:
+#### 🎨 Rule A: On-Demand Theme Variant Archiving
+- When generating an alternate theme variant (e.g., Light Mode vs. Dark Mode) for an approved screen:
   - Do **NOT** overwrite the primary active screen prompt file.
-  - Save a distinct copy with a theme suffix (e.g., `app-screens/<screen_id>_v2_clean_light.md`).
+  - Save a distinct copy with a theme suffix (e.g., `app-screens/prompts/<screen_id>_v2_clean_light.md`).
 
 #### 🛠️ Rule B: Structural & Layout Correction Propagation
-- When the user approves significant structural layout, component, or visual hierarchy corrections for a screen:
-  - The primary prompt file is overwritten with the new approved full standalone prompt at the new version number (e.g. `home_daily_quote_feed_v2.md`).
-  - **Automatic Propagation**: If any theme variant files already exist for that screen (e.g., `app-screens/home_daily_quote_feed_v1_clean_light.md`), the agent **automatically updates** those theme variant files with the new structural blueprint while preserving their respective theme color tokens.
+- When the user approves structural layout corrections for a screen:
+  - Overwrite primary prompt file at new version number.
+  - Automatically update existing theme variant files with the new structural blueprint while preserving theme color tokens.
 
 #### 🌐 Rule C: Universal Multi-App Catalog & Variant Selection Protocol (`design_catalog.json`)
-1. **Universal Multi-App Library**: `design_catalog.json` is a global visual catalog designed to serve as an inspiration and blueprint library across **ANY app project**, not tied to a single codebase.
-2. **Non-Destructive Base Blueprints**: Standard base screen templates in the catalog (e.g. `base_quote_hero`, `settings_list_base`) are **NEVER overwritten** when customizing a screen for a specific app.
-3. **Variant Branching on Customization**: When a screen from the catalog is selected as a base and customized for an app (e.g. adding a low-opacity background image for a quotes app), the agent creates a **new variant entry** in `design_catalog.json` (e.g. `hero_card_low_opacity_nature_bg_v1`).
-4. **App-Specific Modification Isolation**: Subsequent design edits for that app update **only that specific variant entry**, keeping the original base template clean and available for other projects.
-5. **Intelligent Variant Selection for Future Apps**: Each catalog entry includes `domain_tags` (e.g. `["mindset", "quotes", "hero_card", "image_bg"]`), `visual_style`, and `best_use_case` metadata. When starting a new project in any domain (e.g. Settings, Fitness, Finance), the agent analyzes the app brief, queries the catalog metadata, and intelligently selects the variant or base template that best represents the app's goals and domain aesthetics.
-
-#### 🔄 Screen Revision & Screenshot Feedback Protocol (Dual Prompt Standard)
-Whenever the user provides feedback, screenshot corrections, or requests adjustments for a rendered screen:
-1. **Update System & Blueprint Files**:
-   - Update `app_theme.json` if foundational design tokens or locked component specs (e.g. navbar height/padding) changed.
-   - Update `design_catalog.json` with the refined visual blueprint.
-   - Overwrite/update the archived prompt markdown file at `app-screens/<screen_id>.md` (and propagate to existing theme variants per Rule B).
-2. **Output Dual Prompts in Chat Response**:
-   - **Prompt 1: Follow-Up Revision Prompt (Delta Prompt)**: A concise, direct instruction string formatted specifically for the user to copy-paste into an **active Google Stitch thread** to modify their existing rendered canvas in-place.
-   - **Prompt 2: Full Standalone Google Stitch Prompt**: The complete, fully-compiled prompt specification formatted for the user to copy-paste if starting a **brand new canvas** in Google Stitch.
+1. **Universal Multi-App Library**: `design_catalog.json` is a global visual catalog designed to serve as an inspiration and blueprint library across **ANY app project**.
+2. **Non-Destructive Base Blueprints**: Standard base screen templates in the catalog are **NEVER overwritten** when customizing a screen for a specific app.
+3. **Variant Branching on Customization**: When a screen from the catalog is customized for an app, create a **new variant entry** in `design_catalog.json` (e.g. `hero_card_video_preview_v1`).
+4. **Intelligent Variant Selection**: Analyze app brief, query catalog `domain_tags`, and select the variant or base template that best matches the app domain.
 
 ### Phase 4: Hand-Curated Component Library Policy
 - Standalone components inside `"components"` in `design_catalog.json` are **NEVER auto-saved indiscriminately**.
-- The agent only stores a component snippet when:
-  1. The user explicitly requests it (*"Save this bento card as a reusable component"*).
-  2. The agent asks for permission (*"This metric card layout is unique. Should I save it into our hand-curated components library?"*) and the user approves.
-- This guarantees `design_catalog.json` contains only 100% hand-curated, exceptional UI components.
+- Only store component snippets when explicitly requested or approved by the user.
 
 ---
 
 ## 🔄 Domain Adaptation Mode (`--app_domain="Target App"`)
 
-The `--app_domain` flag allows you to take **ANY extracted JSON screen blueprint** from the catalog (e.g. Fintech Wallet, Mood Tracker, E-commerce, Social Feed) and adapt it into **ANY target app domain** (e.g. To-Do App, Fitness Tracker, Recipe Planner, Habit Tracker).
+The `--app_domain` flag allows taking **ANY extracted JSON screen blueprint** from `design_catalog.json` (e.g. Fintech Wallet, Mood Tracker, E-commerce) and adapting it into **ANY target app domain** (e.g. Habit Journal, To-Do App, Fitness Tracker).
 
 ### CLI Flag Syntax:
 ```bash
-node stitch_formatter.js <category> <id> --app_domain="Target App Name"
-# Alternative alias:
-node stitch_formatter.js <category> <id> --domain="Target App Name"
+node .agents/skills/stitch-ui-skill/scripts/stitch_formatter.js <category> <id> --app_domain="Target App Name"
 ```
-
-### Domain Translation Matrix:
-
-| Reference Screen Component | Reference Placeholder (e.g., Fintech/Mood) | Adapted Target Placeholder (e.g., To-Do App) | Adapted Target Placeholder (e.g., Fitness App) |
-| :--- | :--- | :--- | :--- |
-| **Hero Balance Card** | Total Balance: `$24,500.00` | Task Completion: `18/24 Done (75%)` | Weekly Goal: `4/5 Workouts Completed` |
-| **Cards Carousel** | Visa / Mastercard Credit Cards | Active Project Cards (Work, Personal) | Workout Routine Cards (Leg Day, Cardio) |
-| **Operations Grid** | E-Shop, Gift, Charity, Internet | Quick Add, Today, Flagged, Categories | Start Run, Log Water, Track Sleep, Calorie Counter |
-| **Transactions List** | Recent Transfers / Card Payments | Today's Task Items with Checkboxes | Today's Activity Log with Timestamps |
-| **Mood Emoji Chart** | 7-Day Mood Level Bar Chart | 7-Day Task Completion Bar Chart | 7-Day Calorie Burn Bar Chart |
 
 ---
 
@@ -164,38 +164,16 @@ node stitch_formatter.js <category> <id> --domain="Target App Name"
 3. **Zero Shadows & Zero Glows Rule**: Flat UI surfaces ONLY. No drop-shadows, box-shadows, ambient glows, or neon glows. Cards and buttons must use solid fills or clean borders.
 4. **Zero Animations Rule**: 100% static UI renders. No motion graphics, dynamic keyframe loops, or pulsing effects.
 5. **Locked Single Navigation Bar Rule**: Render EXACTLY ONE bottom navigation bar using the locked stadium pill spec from `app_theme.json`. Enforce strict anti-duplication directives so AI generators do not append extra template nav bars.
-6. **Screen Correction & Dual Prompt Standard**: When screenshot corrections or screen revisions are requested, the agent MUST update `app_theme.json`, `design_catalog.json`, and `app-screens/<screen_id>.md`, and output TWO prompts in chat: (1) a concise Follow-Up Revision Prompt for active Stitch threads, and (2) a Full Standalone Prompt for new canvases.
+6. **Screen Correction & Dual Prompt Standard**: When screenshot corrections or screen revisions are requested, the agent MUST update `app_theme.json`, `design_catalog.json`, and `app-screens/prompts/<screen_id>.md`, and output TWO prompts in chat: (1) a concise Follow-Up Revision Prompt for active Stitch threads, and (2) a Full Standalone Prompt for new canvases.
 7. **Auto-Generated Folder README Rule**: Whenever the agent creates or initializes ANY new directory in the project workspace (e.g. `app-screens/`, `components/`, `assets/`, `blueprints/`), the agent MUST automatically generate a clear, self-documenting `README.md` inside that directory explaining its purpose, file naming conventions, and usage guidelines.
-8. **Component Consistency & Strict Icon Locking Rule**: Every locked foundational component MUST specify explicit permanent icon symbols and layout structure rules (e.g. horizontal inline icon+label for active stadium pill vs vertical stacked for inactive) in `app_theme.json` to prevent AI generators from shifting icons or layout structures across screens.
-9. **Embedded SVG Vector Icon Rule**: Locked icons in `app_theme.json` MUST include raw SVG vector string definitions (`<svg viewBox="..." ...><path d="..."/></svg>`) sourced from standard open-source icon libraries (Lucide, Heroicons, Feather). Prompt specs MUST inject these exact mathematical SVG geometries into Stitch prompts to eliminate symbol drift or font rendering differences across screens.
-10. **Universal Component SVG & Quantitative Dimension Locking Rule**: All repeating components across screens (Nav Bar, Headers, Action Buttons, Search Bars, Filter Chips) MUST define explicit SVG vector strings and exact quantitative pixel metrics (`icon_size: 24px x 24px`, `active_label_font_size: 13px`, `inactive_label_font_size: 11px`, `active_pill_height: 56px`, `nav_bar_height: 80px`). Prompt specs MUST inject these exact pixel numbers and SVG paths into every prompt to guarantee zero drift in icon geometry, text scale, or container sizing across the entire app.
-11. **Mandatory Universal Mathematical SVG Vector Injection Directive**: EVERY icon symbol—whether in navigation bars, action buttons, card footers, setting rows, or emblem containers—MUST explicitly include raw mathematical SVG vector code (`<svg width="..." height="..." viewBox="0 0 24 24"><path d="..."/></svg>`). Never use emojis, font placeholders, or generic text labels for icons in generated or compiled prompts.
-12. **Safe Automated Catalog Management Protocol (`design_catalog.json`)**: When extracting reference images, agents may execute safe Node.js scripts to parse, validate JSON syntax, and format catalog entries in `design_catalog.json` to guarantee 0 JSON syntax errors or bracket corruption.
-13. **Central Project SVG Registry & Autonomous Hardcoding Protocol (`app_theme.json.svg_registry`)**:
-    - **Single Source of Truth**: All icon vector geometries for an app MUST be registered in that project's `app_theme.json` under `svg_registry`.
-    - **Autonomous Lookup-or-Register Workflow**:
-      1. Before generating or compiling any screen prompt, the agent MUST check `app_theme.json` -> `svg_registry`.
-      2. If a required icon exists (e.g. `bell_notification`), reuse its exact `svg_code`.
-      3. If a required icon does NOT exist, create a clean mathematical SVG vector string, save it into `app_theme.json.svg_registry`, and embed it directly into the prompt.
-    - **Direct Inline SVG Hardcoding in Prompts**:
-      - Place the exact raw `<svg width="..." height="..." viewBox="0 0 24 24"><path d="..."/></svg>` code block directly inside the prompt directive bullet point at the exact location where Stitch will render it.
-      - Accompany every embedded SVG with an explicit Stitch mandate: `INSTRUCTION FOR STITCH: Render this exact mathematical SVG code: <svg...></svg>. Do NOT replace or generate any other icon!`.
-    - **File Scope Boundaries**:
-      - **Project-Level Workspace Files** (Isolated per app project folder): `app_theme.json`, `app-screens/`, and local project assets.
-      - **Global Reusable Framework Files** (Shared across all projects): `SKILL.md`, `design_catalog.json`, `stitch_formatter.js`, and helper scripts.
-    - **Mandatory SVG Registry Activity Log**:
-      - After every prompt generation, screen update, or reference extraction turn, the agent MUST output a dedicated summary block:
-        * ♻️ **Reused Existing Icons**: List icon keys reused from `app_theme.json.svg_registry`.
-        * ✨ **Registered New Icons**: List new icon keys created and added to `app_theme.json.svg_registry`.
-14. **Contextual Git Commit & User Approval Protocol**:
-    - **User Confirmation Mandate**: The agent MUST NEVER run `git commit` or `git push` silently. The agent MUST propose the exact commit message and ask for explicit user approval before executing any Git action.
-    - **Context-Specific Commit Messages**: Commit messages MUST specify the exact screens or rules modified (e.g. `feat(catalog): extract onboarding_nutrilens_v1 & 4 nutrition blueprints`, `docs(skill): add Rule 13 SVG registry protocol`).
-    - **Dynamic Git Remote Target**: The agent MUST target the local repository's configured `origin` remote (resolving dynamically via `git remote get-url origin` inside the skill directory or project workspace).
-    - **Immediate `SKILL.md` Update Commit Workflow**: Whenever changes, corrections, or rule additions to `SKILL.md` are approved by the user, the agent MUST target the skill repository directory (e.g. `C:\Users\ADMIN\Desktop\stitch-ui-design-skill` or `.agents/skills/ui-design-skill`), propose a Git commit for `SKILL.md`, and ask for user approval before pushing to its `origin` remote.
-15. **Project-Scoped Persistent Memory Log Protocol (`MEMORY.md`)**:
-    - **Local Workspace Scope**: Every project workspace MUST maintain a local `./MEMORY.md` file tracking app goals, active screen versions, design system locks, registered SVG icons, and user preferences.
-    - **Auto-Bootstrapping**: If `./MEMORY.md` does not exist in a new project folder, the agent creates it using the template in `SKILL.md`.
-    - **Autonomous Memory Updates**: After every screen revision, blueprint extraction, or architectural decision, the agent updates `./MEMORY.md` to keep context sharp and token usage minimal across sessions and AI tools.
+8. **Component Consistency & Strict Icon Locking Rule**: Every locked foundational component MUST specify explicit permanent icon symbols and layout structure rules in `app_theme.json`.
+9. **Embedded SVG Vector Icon Rule**: Locked icons in `app_theme.json` MUST include raw SVG vector string definitions (`<svg viewBox="..." ...><path d="..."/></svg>`) sourced from standard open-source icon libraries (Lucide, Heroicons, Feather).
+10. **Universal Component SVG & Quantitative Dimension Locking Rule**: All repeating components across screens (Nav Bar, Headers, Action Buttons, Search Bars, Filter Chips) MUST define explicit SVG vector strings and exact quantitative pixel metrics (`icon_size: 24px x 24px`, `active_label_font_size: 13px`, `inactive_label_font_size: 11px`, `active_pill_height: 56px`, `nav_bar_height: 80px`).
+11. **Mandatory Universal Mathematical SVG Vector Injection Directive**: EVERY icon symbol MUST explicitly include raw mathematical SVG vector code. Never use emojis or font placeholders for icons.
+12. **Safe Automated Catalog Management Protocol (`design_catalog.json`)**: When extracting reference images, agents may execute safe Node.js scripts (`scripts/add_catalog_blueprint.js`) to parse and validate catalog entries.
+13. **Central Project SVG Registry & Autonomous Hardcoding Protocol (`app_theme.json.svg_registry`)**: All icon vector geometries for an app MUST be registered in `app_theme.json` under `svg_registry`.
+14. **Contextual Git Commit & User Approval Protocol**: The agent MUST NEVER run `git commit` or `git push` silently. The agent MUST propose the exact commit message and ask for explicit user approval before executing any Git action.
+15. **Dedicated UI Design Memory Log Protocol (`docs/04-ui-design/DESIGN-MEMORY.md`)**: Local workspace file inside `docs/04-ui-design/` tracking app goals, active screen versions, design system locks, registered SVG icons, and user preferences. **Isolated from general agent memory to guarantee zero collisions.**
 
 ---
 
@@ -203,165 +181,40 @@ node stitch_formatter.js <category> <id> --domain="Target App Name"
 
 To prevent generative AI drift across screens (such as shifting icons, straight tick quote marks vs curved quote marks, or changing layout alignment between active/inactive states):
 
-1. **Embedded SVG Vector Mandate**:
-   - Every locked component tab/button in `app_theme.json` includes an immutable `svg_vector` string containing the exact SVG `<path>` data from standard icon libraries (e.g., Lucide, Feather, Heroicons).
-   - Injecting raw mathematical SVG vectors into Stitch prompts guarantees 100% precise icon geometry rendering across all app screens, preventing AI generators from replacing curved quote marks with straight ticks or speech bubbles.
-
+1. **Embedded SVG Vector Mandate**: Every locked component tab/button in `app_theme.json` includes an immutable `svg_vector` string containing the exact SVG `<path>` data.
 2. **Dual Active vs. Inactive Layout Directives**:
-   - **Active State Layout**: Explicitly state the exact layout mode (`HORIZONTAL_INLINE_SIDE_BY_SIDE` for active pills where the icon sits to the left of the label inside the highlighted pill).
-   - **Inactive State Layout**: Explicitly state `VERTICAL_STACK_ICON_TOP_LABEL_BOTTOM` (icon centered on top, label text centered below).
-
+   - **Active State Layout**: `HORIZONTAL_INLINE_SIDE_BY_SIDE` (icon left of label inside active pill).
+   - **Inactive State Layout**: `VERTICAL_STACK_ICON_TOP_LABEL_BOTTOM` (icon centered top, label centered bottom).
 3. **Quantitative Pixel & Font Dimension Locking**:
-   - Every repeating locked component MUST specify exact pixel metrics:
-     * **Icon Dimensions**: `24px x 24px` standard vector size for nav icons and action buttons.
-     * **Typography Sizes**: Active tab label = `13px` bold, Inactive tab label = `11px` medium, Header titles = `26px` display, Subtitles = `14px`.
-     * **Container Metrics**: Nav bar total height = `80px`, Active pill container height = `56px`, Corner radius = `full_stadium_pill_100px`, Border = `1.5px`.
-   - Prompt specs MUST explicitly state these pixel numbers so AI generators do not shrink, stretch, or alter font/icon proportions across screens.
-
-4. **Anti-Drift Prompt Directives**:
-   - Every compiled Stitch prompt must include a strict `LOCKED NAVIGATION BAR STRICT LAYOUT & ICON DIRECTIVE` section with embedded SVG code and explicit pixel dimensions forbidding icon substitutions, font scaling shifts, or layout structure changes across app screens.
+   - Icon dimensions: `24px x 24px` standard vector size.
+   - Typography sizes: Active label = `13px` bold, Inactive label = `11px` medium, Header titles = `26px` display, Subtitles = `14px`.
+   - Container metrics: Nav bar height = `80px`, Active pill height = `56px`, Corner radius = `32px`.
 
 ---
 
-## 🚀 Auto-Bootstrapping & Workspace Organization Protocol
+## 📋 Hardcoded Unabridged Output Prompt Examples
 
-When an agent is invoked in a project folder, it MUST enforce standard directory structures for both the Skill Repository and the Project Workspace.
+The agent MUST follow these exact output formats when executing `/ui-flow`, `/app-icon`, and `/app-screenshots`.
 
-### 1. Master Skill Repository Directory Structure (`ui-design-skill/`)
-The GitHub Skill Repository folder is named after what the skill does (`ui-design-skill/` or `stitch-ui-design-skill/`). The main instruction file inside is named `SKILL.md`:
-```
-ui-design-skill/ (GitHub Skill Repository Root)
-├── SKILL.md                 <── Master Rulebook, Protocols & Script Templates
-├── README.md                <── Skill Installation & Usage Overview
-└── resources/               <── Shared Master Assets
-    └── design_catalog.json  <── Master Blueprint Library (6,000+ lines)
-```
+### 1. Hardcoded Example Output Prompt: `/ui-flow` (Google Stitch Screen Format)
 
-### 2. Standard Project Workspace Directory Structure (`[Project Root]/`)
-Every app project workspace MUST maintain a clean, predictable folder tree:
-```
-[Project Root]/ (App Workspace Folder)
-├── MEMORY.md                <── Local Project Memory Log
-├── app_theme.json           <── Local App Theme & Icon SVG Registry
-├── design_catalog.json      <── Local Copy of Master Blueprint Library
-├── stitch_formatter.js      <── Local Prompt Compiler Script
-└── app-screens/             <── Active Screen Prompts & Visual Screenshots Directory
-    ├── README.md            <── Directory Index & Active Screen Manifest
-    ├── prompts/             <── Compiled Google Stitch Prompt Blueprints (.md)
-    │   ├── home_daily_quote_feed_v6.md
-    │   ├── explore_mindset_topics_v5.md
-    │   ├── saved_quotes_journal_v11.md
-    │   └── profile_streak_stats_settings_v6.md
-    └── images/              <── Rendered UI Screenshots (.png / .jpg)
-        ├── home_daily_quote_feed_v6.png
-        ├── explore_mindset_topics_v5.png
-        ├── saved_quotes_journal_v11.png
-        └── profile_streak_stats_settings_v6.png
-```
+Below is an unabridged, copy-pasteable example of a compiled Google Stitch UI screen prompt for a Home Dashboard flow:
 
-### 3. File Bootstrapping & Organization Mandate:
-1. **Missing File Bootstrapping**: If `design_catalog.json`, `app_theme.json`, `stitch_formatter.js`, or `MEMORY.md` are missing from the project root, the agent automatically creates/copies them from the skill templates.
-2. **File Organization**: The agent MUST place all active screen prompt `.md` files inside `app-screens/prompts/` and link matching screenshot images in `app-screens/images/`.
-3. **Single Active File Enforcement**: The agent MUST delete archived screen versions per the Single Active File Overwrite Mandate and update `app-screens/README.md`.
-
----
-
-## 📄 File Templates & Full Source Code
-
-### 1. `stitch_formatter.js` (Complete Production Source)
-
-```javascript
-/**
- * Stitch Prompt Formatter & Color Token Compiler
- * 
- * Usage:
- *   node stitch_formatter.js [category] [id] [--theme=theme_name] [--app_domain="Target App"]
- * 
- * Examples:
- *   node stitch_formatter.js home home_personalized_greeting_mood_tracker_grid --app_domain="To-Do App"
- */
-
-const fs = require('fs');
-const path = require('path');
-
-const CATALOG_PATH = path.join(__dirname, 'design_catalog.json');
-const THEME_PATH = path.join(__dirname, 'app_theme.json');
-
-function loadJSON(filePath) {
-  if (!fs.existsSync(filePath)) {
-    console.error(`Error: File not found at ${filePath}`);
-    process.exit(1);
-  }
-  return JSON.parse(fs.readFileSync(filePath, 'utf8'));
-}
-
-function applyAppThemeToSpec(specObj, colorTokens) {
-  if (!specObj || typeof specObj !== 'object') return specObj;
-
-  if (Array.isArray(specObj)) {
-    return specObj.map(item => applyAppThemeToSpec(item, colorTokens));
-  }
-
-  const result = {};
-  for (const [key, value] of Object.entries(specObj)) {
-    if (typeof value === 'object' && value !== null) {
-      result[key] = applyAppThemeToSpec(value, colorTokens);
-    } else if (typeof value === 'string' && colorTokens[value]) {
-      result[key] = `${colorTokens[value]} /* role: ${value} */`;
-    } else {
-      result[key] = value;
-    }
-  }
-
-  if (specObj.color_role && colorTokens[specObj.color_role]) {
-    result.resolved_hex_color = colorTokens[specObj.color_role];
-  }
-
-  return result;
-}
-
-function generateStitchPrompt(spec, themeConfig, activeThemeKey, appDomain) {
-  const activeTheme = themeConfig.themes[activeThemeKey] || themeConfig.themes[themeConfig.active_theme];
-  const colorTokens = activeTheme.color_tokens;
-  const themeInjectedSpec = applyAppThemeToSpec(spec, colorTokens);
-
-  let lockedNav = null;
-  if (themeConfig.locked_navigation_bar) {
-    const rawNav = JSON.parse(JSON.stringify(themeConfig.locked_navigation_bar));
-    const currentCategory = (spec.screen_type || '').toLowerCase();
-    if (rawNav.tabs && Array.isArray(rawNav.tabs)) {
-      rawNav.tabs = rawNav.tabs.map(tab => ({
-        ...tab,
-        active_state: tab.tab_id.toLowerCase() === currentCategory,
-        active_pill_highlight: tab.tab_id.toLowerCase() === currentCategory
-      }));
-    }
-    lockedNav = applyAppThemeToSpec(rawNav, colorTokens);
-  }
-
-  const effectiveNav = lockedNav || themeInjectedSpec.single_bottom_navigation_bar;
-  const targetAppName = appDomain ? `${themeConfig.app_name} (${appDomain})` : themeConfig.app_name;
-  const svgRegistry = themeConfig.svg_registry || {};
-
-  return `=== GOOGLE STITCH PROMPT SPECIFICATION ===
+```markdown
+=== GOOGLE STITCH PROMPT SPECIFICATION ===
 Target Platform: Mobile Smartphone App Screen (Vertical 9:16 Portrait)
-Target App Name: ${targetAppName}
-Active Theme Profile: "${activeTheme.name}" (${activeThemeKey})
-Design Title: ${spec.title}${appDomain ? ` (Adapted to ${appDomain})` : ''}
+Target App Name: StreakStudio (5-Sec Video Habit Journal)
+Active Theme Profile: "Cyber Obsidian Dark" (cyber_obsidian)
+Design Title: StreakStudio Home Daily Streak Feed & 5s Video Recorder Screen
 Target Viewport: Mobile Smartphone App Screen (Vertical 9:16 Portrait)
-Screen Category: ${spec.screen_type || spec.component_type}
-${appDomain ? `
-[DOMAIN ADAPTATION DIRECTIVE - TARGET DOMAIN: "${appDomain}"]
-CRITICAL: Adapt all content placeholders, section titles, card labels, list items, and action buttons from the reference layout blueprint below to fit a "${appDomain}".
-1. Keep the EXACT visual structure, card containers, flex/grid layouts, component spacing, and locked bottom navigation bar.
-2. Translate all domain-specific text and placeholders into "${appDomain}" equivalents.
-` : ''}
+Screen Category: home
+
 [CRITICAL CANVAS ASPECT RATIO INSTRUCTION]
 Canvas Type: Mobile Phone App Screen (Narrow Vertical Portrait 9:16 aspect ratio).
 Do NOT render a widescreen desktop dashboard, web browser canvas, or wide tablet container. The generated UI canvas MUST be a standard narrow vertical smartphone app screen.
 
 [GOAL & INSTRUCTIONS FOR GOOGLE STITCH]
-Generate a high-fidelity mobile app screen using the exact structural layout, component positions, and element scale below. Apply the specified app color palette and styling tokens into the design.
+Generate a high-fidelity mobile app screen for StreakStudio using the exact structural layout, component positions, and element scale below. Apply the specified app color palette and styling tokens into the design.
 
 [EMBEDDED MATHEMATICAL SVG VECTOR ICON MANDATE]
 CRITICAL MANDATORY DIRECTIVE FOR ALL ICONS:
@@ -369,243 +222,168 @@ CRITICAL MANDATORY DIRECTIVE FOR ALL ICONS:
 - Do NOT use emojis, text placeholders, or generic font names for icons under any circumstances!
 
 [PROJECT CENTRAL SVG REGISTRY (APP_THEME.JSON)]
-${JSON.stringify(svgRegistry, null, 2)}
-
-[APP DESIGN SYSTEM COLOR PALETTE]
-- Primary Brand Accent: ${colorTokens.primary_brand_accent}
-- Primary Accent: ${colorTokens.primary_accent}
-- Surface Background: ${colorTokens.surface_background}
-- Elevated Surface: ${colorTokens.surface_elevation_1}
-- Container Surface: ${colorTokens.surface_container}
-- Dark Container Surface: ${colorTokens.surface_container_dark || '#18181B'}
-- High-Contrast Text: ${colorTokens.on_surface_high}
-- Medium Text: ${colorTokens.on_surface_medium}
-- Muted Text: ${colorTokens.on_surface_muted}
-- Subtle Border / Outline: ${colorTokens.outline_subtle}
-
-[EXACT LAYOUT & COMPONENT BLUEPRINT (WITH APPLIED APP THEME)]
-Background Configuration:
-${JSON.stringify(themeInjectedSpec.background, null, 2)}
-
-Layout Structure:
-${JSON.stringify(themeInjectedSpec.layout_structure, null, 2)}
-
-Main Page Sections:
-${JSON.stringify(themeInjectedSpec.sections || themeInjectedSpec.tabs || themeInjectedSpec, null, 2)}
-${effectiveNav ? `
-[LOCKED APP NAVIGATION SYSTEM - 100% CONSISTENT ON ALL APP SCREENS]
-IMPORTANT: This is the app's locked navigation bar. Render ONLY this single floating stadium pill navigation bar at the bottom of the screen. Do NOT append any default AI template navigation bar!
-${JSON.stringify(effectiveNav, null, 2)}
-` : ''}
-[STRICT GENERATION CONSTRAINTS & ANTI-DUPLICATION RULES]
-1. MOBILE PORTRAIT CANVAS ONLY: Render a narrow vertical mobile smartphone app screen ONLY. Do NOT generate a widescreen desktop dashboard or wide web canvas.
-2. ZERO ANIMATION RULE: Render static UI ONLY. Absolutely NO animations, NO motion graphics, NO dynamic keyframe loops, and NO pulsing or glowing movement. The output must be completely static.
-3. ZERO SHADOWS & ZERO GLOW RULE: Render flat UI surfaces ONLY. Absolutely NO drop-shadows, NO box-shadows, NO ambient glows, NO neon glow halos, and NO outer/inner glow effects. All cards, buttons, and containers must be completely flat with clean borders or solid color fills.
-4. LOCKED NAVIGATION BAR CONSISTENCY: Render EXACTLY ONE bottom navigation bar on the entire screen using the locked stadium pill spec above. Do NOT alter the navigation bar shape, tabs, or styling.
-5. SINGLE TOP HEADER RULE: Do NOT duplicate the top header bar.
-6. Reproduce the exact layout flex/grid structure, stacking order, element padding, and vertical positioning as specified in the blueprint above.
-7. Use the target app's exact color values provided above (${colorTokens.primary_brand_accent} for primary elements, ${colorTokens.surface_background} for main surface).
-8. Do NOT invent extra section cards or duplicate bottom tabs outside of the specified blueprint.
-============================================================`;
-}
-
-function main() {
-  const catalog = loadJSON(CATALOG_PATH);
-  const themeConfig = loadJSON(THEME_PATH);
-
-  const rawArgs = process.argv.slice(2);
-  const flags = rawArgs.filter(a => a.startsWith('--'));
-  const args = rawArgs.filter(a => !a.startsWith('--'));
-
-  let activeThemeKey = themeConfig.active_theme;
-  const themeFlag = flags.find(f => f.startsWith('--theme='));
-  if (themeFlag) activeThemeKey = themeFlag.split('=')[1];
-
-  let appDomain = null;
-  const domainFlag = flags.find(f => f.startsWith('--app_domain=') || f.startsWith('--domain='));
-  if (domainFlag) appDomain = domainFlag.split('=')[1].replace(/^["']|["']$/g, '');
-
-  if (args.length < 2) {
-    console.log(`\n🎨 Active App Theme: "${themeConfig.themes[activeThemeKey]?.name || activeThemeKey}"`);
-    console.log('\n📱 Available Screen Specs in Catalog:');
-    for (const [cat, list] of Object.entries(catalog.screens)) {
-      console.log(`\nCategory [${cat}]:`);
-      list.forEach(s => console.log(`  - ID: "${s.id}" | Title: ${s.title}`));
-    }
-    return;
-  }
-
-  const [category, id] = args;
-  let targetSpec = null;
-  if (catalog.screens[category]) targetSpec = catalog.screens[category].find(item => item.id === id);
-  if (!targetSpec && catalog.components[category]) targetSpec = catalog.components[category].find(item => item.id === id);
-
-  if (!targetSpec) {
-    console.error(`\n❌ Spec with ID "${id}" in category "${category}" not found.`);
-    return;
-  }
-
-  console.log(generateStitchPrompt(targetSpec, themeConfig, activeThemeKey, appDomain));
-}
-
-main();
-```
-
----
-
-### 2. `app_theme.json` (Template)
-
-```json
 {
-  "app_name": "My Vibe App",
-  "active_theme": "cyber_obsidian",
-  "svg_registry": {
-    "bell_notification": {
-      "category": "alerts",
-      "svg_code": "<svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9\"/><path d=\"M13.73 21a2 2 0 0 1-3.46 0\"/></svg>"
-    },
-    "pencil_edit": {
-      "category": "actions",
-      "svg_code": "<svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.5\"><path d=\"M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z\"/></svg>"
-    }
-  },
-  "global_platform_settings": {
-    "target_platform": "Mobile Smartphone App Screen (Vertical 9:16 Portrait)",
-    "canvas_aspect_ratio": "9:16 vertical portrait mobile phone",
-    "shadow_policy": "ZERO_SHADOWS_AND_ZERO_GLOWS",
-    "motion_policy": "STATIC_UI_ONLY_ZERO_ANIMATIONS"
-  },
-  "locked_navigation_bar": {
-    "type": "stadium_pill_navigation_bar",
-    "anti_duplication_rule": "ONLY_RENDER_THIS_SINGLE_NAVIGATION_BAR_DO_NOT_ADD_SECOND_NAV_BAR",
-    "position": "fixed_bottom_center",
-    "horizontal_margin": "sp_16",
-    "bottom_offset": "sp_16",
-    "corner_radius": "32px",
-    "padding": "sp_8",
-    "color_role": "surface_container_dark",
-    "tabs": [
-      { "tab_id": "home", "label": "Home", "icon": "home_icon", "active_state": true, "text_color_role": "primary_accent", "active_pill_highlight": true },
-      { "tab_id": "insights", "label": "Insights", "icon": "grid_icon", "active_state": false, "text_color_role": "on_surface_muted", "active_pill_highlight": false },
-      { "tab_id": "journal", "label": "Journal", "icon": "book_icon", "active_state": false, "text_color_role": "on_surface_muted", "active_pill_highlight": false },
-      { "tab_id": "profile", "label": "Profile", "icon": "user_icon", "active_state": false, "text_color_role": "on_surface_muted", "active_pill_highlight": false }
-    ]
-  },
-  "themes": {
-    "cyber_obsidian": {
-      "name": "Cyber Obsidian Dark",
-      "color_tokens": {
-        "primary_brand_accent": "#00E5FF",
-        "primary_accent": "#00E5FF",
-        "surface_background": "#090A0F",
-        "surface_elevation_1": "#12141D",
-        "surface_container": "#181B26",
-        "surface_container_dark": "#18181B",
-        "on_surface_high": "#FFFFFF",
-        "on_surface_medium": "#A0A5B5",
-        "on_surface_muted": "#606575",
-        "outline_subtle": "#232736"
-      }
-    },
-    "clean_light": {
-      "name": "Clean Obsidian Light",
-      "color_tokens": {
-        "primary_brand_accent": "#0066FF",
-        "primary_accent": "#0066FF",
-        "surface_background": "#F8FAFC",
-        "surface_elevation_1": "#FFFFFF",
-        "surface_container": "#F1F5F9",
-        "surface_container_dark": "#0F172A",
-        "on_surface_high": "#0F172A",
-        "on_surface_medium": "#475569",
-        "on_surface_muted": "#94A3B8",
-        "outline_subtle": "#E2E8F0"
-      }
-    }
-  }
+  "flame_streak": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"#FF6D00\" stroke-width=\"2\"><path d=\"M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z\"/></svg>",
+  "video_camera": "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"#00E5FF\" stroke-width=\"2\"><polygon points=\"23 7 16 12 23 17 23 7\"/><rect x=\"1\" y=\"5\" width=\"15\" height=\"14\" rx=\"2\" ry=\"2\"/></svg>",
+  "plus_add": "<svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"#FFFFFF\" stroke-width=\"2.5\"><line x1=\"12\" y1=\"5\" x2=\"12\" y2=\"19\"/><line x1=\"5\" y1=\"12\" x2=\"19\" y2=\"12\"/></svg>"
 }
+
+[APP DESIGN SYSTEM COLOR PALETTE & TYPOGRAPHY]
+- Primary Brand Accent: #00E5FF (Electric Cyan)
+- Secondary Vibe Accent: #FF6D00 (Flame Orange)
+- Surface Background: #090A0F (Cyber Obsidian)
+- Container Surface: #181B26
+- High-Contrast Text: #FFFFFF (Font: Plus Jakarta Sans Bold)
+- Body & Muted Text: #A0A5B5 (Font: Inter Medium)
+- Subtle Border: #232736
+
+[EXACT LAYOUT & COMPONENT BLUEPRINT]
+1. Header Bar (56px Height):
+   - Left: App Mascot Icon (Sparky Flame) + Title "StreakStudio" (Font: Plus Jakarta Sans 22px Bold, Color: #FFFFFF).
+   - Right: Active Streak Counter Pill (#181B26 background, 1.5px #232736 border, rounded-full) containing SVG Flame Icon + Text "14 Days 🔥" (#FF6D00, 14px SemiBold).
+
+2. Hero Daily Action Card (#181B26 background, 24px rounded corners, 1.5px #00E5FF border):
+   - Card Badge: "TODAY'S 5-SEC HABIT" (#00E5FF background, #090A0F text, 11px Bold, 6px padding).
+   - Card Title: "Record Your 5-Second Morning Workout Clip" (Font: Plus Jakarta Sans 18px Bold, #FFFFFF).
+   - Center Visual: Video Viewport Frame (9:16 thumbnail preview with dark low-opacity overlay) featuring camera shutter button icon (64px circle, #00E5FF fill, white inner ring).
+   - CTA Primary Action Button: Full-width 52px height stadium pill button (#00E5FF solid fill, #090A0F text, Plus Jakarta Sans 16px Bold) reading "Hold to Record 5s Clip".
+
+3. Daily Streak Milestones Grid:
+   - Section Title: "Weekly Consistency" (#FFFFFF 16px Bold).
+   - 7 Day Tracker Pills (Mon - Sun): Completed days (Mon-Fri) rendered in solid #FF6D00 fill with white checkmarks; Today (Sat) pulsing cyan ring; Sun locked gray.
+
+[LOCKED APP NAVIGATION SYSTEM]
+Render ONLY this single floating stadium pill navigation bar (80px height, 32px corner radius, #18181B dark surface container):
+- Tab 1 [Home - Active]: #00E5FF highlighted pill container, icon + "Today" label.
+- Tab 2 [Streaks]: Muted text #A0A5B5, flame icon + "Streaks" label.
+- Tab 3 [Memories]: Muted text #A0A5B5, video gallery icon + "Memories" label.
+- Tab 4 [Profile]: Muted text #A0A5B5, user icon + "Profile" label.
+
+[STRICT GENERATION CONSTRAINTS]
+1. MOBILE PORTRAIT CANVAS ONLY (9:16 Portrait Aspect Ratio).
+2. ZERO SHADOWS & ZERO GLOWS (Flat 2D surfaces only).
+3. ZERO ANIMATION RULE (100% static UI render).
+4. LOCKED SINGLE NAVIGATION BAR (Do NOT render multiple nav bars).
+============================================================
 ```
 
 ---
 
-### 3. `design_catalog.json` (Template Structure)
+### 2. Hardcoded Example Output Prompt: `/app-icon` (Dual-Prompt Standard)
 
-```json
-{
-  "$schema": "http://json-schema.org/draft-07/schema#",
-  "version": "1.0.0",
-  "description": "Color-Agnostic UI Design Catalog for Google Stitch",
-  "screens": {
-    "get_started": [],
-    "sign_up": [],
-    "home": [],
-    "insights": [],
-    "wallet": []
-  },
-  "components": {
-    "nav_tabs": []
-  }
-}
-```
-
----
-
-### 4. `add_catalog_blueprint.js` (Safe Extraction Helper Script Template)
-
-```javascript
-/**
- * Safe Catalog Blueprint Extractor Helper Script
- * Parses, validates JSON syntax, and safely appends color-agnostic blueprints to design_catalog.json.
- */
-const fs = require('fs');
-const path = require('path');
-
-const catalogPath = path.join(__dirname, 'design_catalog.json');
-const catalog = JSON.parse(fs.readFileSync(catalogPath, 'utf8'));
-
-const newBlueprints = [
-  {
-    "id": "screen_or_component_id_v1",
-    "title": "Descriptive Blueprint Title",
-    "screen_type": "profile",
-    "description": "Extracted visual layout blueprint description...",
-    "viewport_target": "app_screen",
-    "background": {
-      "type": "solid_surface_background",
-      "color_role": "surface_background"
-    },
-    "sections": [
-      {
-        "section_id": "header_section",
-        "type": "compact_header",
-        "title": "Section Title",
-        "right_action_svg": "<svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"...\"/></svg>"
-      }
-    ]
-  }
-];
-
-newBlueprints.forEach(bp => {
-  const cat = bp.screen_type;
-  if (!catalog.screens[cat]) catalog.screens[cat] = [];
-  const existingIdx = catalog.screens[cat].findIndex(item => item.id === bp.id);
-  if (existingIdx >= 0) {
-    catalog.screens[cat][existingIdx] = bp;
-  } else {
-    catalog.screens[cat].push(bp);
-  }
-});
-
-fs.writeFileSync(catalogPath, JSON.stringify(catalog, null, 2), 'utf8');
-console.log('Successfully appended blueprints to design_catalog.json!');
-```
-
----
-
-### 5. `MEMORY.md` (Project Memory Log Template)
+Below is an unabridged, copy-pasteable example of an `/app-icon` exploration suite delivering dual prompts:
 
 ```markdown
-# 🧠 Project Memory & Active State Log (`MEMORY.md`)
+# 📱 App Icon Design Exploration: StreakStudio — 5-Sec Video Habit Journal
+
+## 🎨 Design Vision & Canvas Specs
+- **App Concept**: 5-Second Video Habit Journal & Daily Streak Tracker
+- **Brand Vibe**: Energetic, Tactile, Modern, Cyber Obsidian & Flame Orange
+- **Canvas Requirements**: Standard App Icon (1:1 Square with rounded squircle mask framing, high contrast, zero tiny text)
+
+---
+
+### VARIANT A: Google Stitch Canvas Exploration Prompt
+*(Copy-paste into Google Stitch for a clean, vector 2D design system icon spec)*
+
+```
+=== GOOGLE STITCH APP ICON SPECIFICATION ===
+Target Platform: Mobile App Icon Spec (1:1 Aspect Ratio Canvas)
+App Name: StreakStudio
+Brand Colors: #00E5FF (Electric Cyan), #FF6D00 (Flame Orange), #090A0F (Cyber Obsidian)
+
+[GOAL & INSTRUCTIONS FOR GOOGLE STITCH]
+Generate an App Store high-resolution mobile app icon on a 1:1 square canvas with iOS squircle corner mask framing.
+
+[VISUAL COMPOSITION BLUEPRINT]
+- Icon Container: Dark obsidian gradient background (#090A0F top-left to #12141D bottom-right) with a subtle 2px #00E5FF border highlight around the squircle edge.
+- Central Emblem: A stylized dual-symbol fusion of a 5-second video camera shutter aperture ring intertwined with a vibrant #FF6D00 flame vector symbol.
+- Center Shutter Ring: Clean 64px circular aperture ring drawn in #00E5FF solid stroke with a centered play triangle.
+- Lighting & Surface: Flat 2D vector graphic aesthetics. Zero photorealistic glossy glass reflection, zero outer ambient neon glow, zero complex gradient mesh.
+- Composition Rule: Center the emblem with 25% padding on all sides. Do NOT add app title text inside the icon.
+
+[STRICT GENERATION CONSTRAINTS]
+1. 1:1 SQUARE ASPECT RATIO ONLY with rounded squircle boundary.
+2. FLAT 2D VECTOR SURFACE ONLY. No 3D render depth or hyper-realistic textures.
+3. NO SMALL TEXT INSIDE ICON. Emblem symbol ONLY.
+============================================================
+```
+
+---
+
+### VARIANT B: ChatGPT / Midjourney / DALL-E / Recraft Generative Prompt
+*(Copy-paste into ChatGPT DALL-E 3, Midjourney v6, Ideogram 2, or Recraft V3)*
+
+```
+App store icon for a mobile habit tracker app named StreakStudio, 1:1 aspect ratio, centered emblem composition on a dark obsidian background (#090A0F). The icon features a striking minimalistic flat 2D vector logo combining an electric cyan (#00E5FF) video camera shutter ring and a bright flame orange (#FF6D00) streak icon. Clean geometric lines, smooth curves, iOS squircle shape framing, bold colors, professional App Store aesthetic, vector graphic style, high contrast, no words or text, isolated design on dark background --v 6.0 --ar 1:1 --no text, font, photorealism, glossy glass, shadows
+```
+
+---
+
+```carousel
+![App Icon Variant A Stitch](/app-screens/images/app_icon_variant_a.png)
+<!-- slide -->
+![App Icon Variant B Midjourney](/app-screens/images/app_icon_variant_b.png)
+```
+```
+
+---
+
+### 3. Hardcoded Example Output Prompt: `/app-screenshots` (Dual-Prompt Standard)
+
+Below is an unabridged, copy-pasteable example of an `/app-screenshots` App Store marketing storyboard suite delivering dual prompts:
+
+```markdown
+# 📸 App Store Marketing Screenshots Storyboard: StreakStudio
+
+## 📐 Storyboard Overview (5 Screenshots + Web Hero Mockup)
+- **Screen 1 (Hook)**: "Build Unstoppable Habits in 5 Seconds a Day" (Home Feed & Shutter)
+- **Screen 2 (Feature)**: "Record & Lock Your Daily Video Clip" (5s Camera Viewport)
+- **Screen 3 (Streaks)**: "Watch Your 30-Day Flame Streak Grow" (Milestone Calendar)
+- **Screen 4 (Memories)**: "Relive Your Habit Journey in 1-Min Rewinds" (Video Montage)
+- **Screen 5 (Paywall)**: "Unlock Unlimited Cloud Rewinds with Pro" (Paywall Trial Modal)
+- **Screen 6 (Web Hero)**: Next.js Storefront Hero Mockup with `shots.so` transparent device framing
+
+---
+
+### SCREEN 1 (THE HOOK): Dual-Prompt Specification
+
+#### VARIANT A: Google Stitch Screenshot Prompt
+```
+=== GOOGLE STITCH APP STORE SCREENSHOT SPECIFICATION ===
+Target Platform: Mobile App Store Marketing Screenshot (Vertical 9:16 Portrait)
+App Name: StreakStudio
+Screenshot Index: 1 of 5 (Hero Hook Screenshot)
+
+[BACKGROUND CANVAS & TYPOGRAPHY HEADER]
+- Top Background: Soft dark ambient gradient (#090A0F to #181B26).
+- Headline Banner: "Build Unstoppable Habits in 5 Seconds a Day" (Font: Plus Jakarta Sans 28px ExtraBold, Color: #FFFFFF, Center Aligned).
+- Subheadline: "No typing required. Just hold to record your daily win." (Font: Inter 14px Medium, Color: #A0A5B5).
+
+[EMBEDDED DEVICE MOCKUP FRAME]
+- Device Framing: Frameless vertical 9:16 iPhone 15 Pro titanium frame tilted at 0 degrees centered in the bottom 70% of the canvas.
+- Displayed App Screen: StreakStudio Home Dashboard Screen showing 14-day flame streak counter (#FF6D00), cyan 5s video shutter card (#00E5FF), and bottom stadium pill navbar.
+
+[STRICT CONSTRAINTS]
+1. 9:16 PORTRAIT CANVAS ONLY.
+2. Professional App Store presentation framing with headline copy at the top and app mockup below.
+============================================================
+```
+
+#### VARIANT B: ChatGPT / Midjourney / DALL-E / Recraft Prompt
+```
+App Store promotional screenshot for a mobile video habit app named StreakStudio, 9:16 portrait ratio. Dark premium gradient background (#090A0F). Bold white headline at the top reading 'Build Unstoppable Habits in 5 Seconds a Day'. Centered floating 3D iPhone mockup displaying a dark mode app UI with an electric cyan (#00E5FF) video record button and orange flame (#FF6D00) streak badge. Modern Apple App Store feature graphic style, sleek composition, 8k resolution, vector UI graphics --v 6.0 --ar 9:16
+```
+```
+
+---
+
+## 📄 File Templates & Full Source Code
+
+### 1. Dedicated UI Design Memory Log Template (`docs/04-ui-design/DESIGN-MEMORY.md`)
+
+```markdown
+# 🧠 UI Design System & Screen Memory Log (`docs/04-ui-design/DESIGN-MEMORY.md`)
 
 ## 📌 Project Overview
 - **App Name**: [Target App Name]
@@ -619,7 +397,7 @@ console.log('Successfully appended blueprints to design_catalog.json!');
 - **Tab 4 `[ 👤 Profile ]`**: [screen_4_filename.md] (Active version: vX)
 
 ## 🎨 Locked Design System & Navbar Specs
-- **Navbar Fill**: Solid Brand Accent, 80px total height, 100px stadium radius.
+- **Navbar Fill**: Solid Brand Accent, 80px total height, 32px corner radius.
 - **Active Pill**: Inverted Dark Surface, 56px height, white text, side-by-side icon + label.
 - **Inactive Tab Icons**: 2-line vertical stack (icon top, label text bottom).
 
@@ -635,10 +413,6 @@ console.log('Successfully appended blueprints to design_catalog.json!');
 
 ---
 
-## ⚠️ Common Pitfalls & Prevention Checklist
-
-- ❌ **JSON Nesting Error**: Always verify that ending brackets `]` and braces `}` are placed at the end of section arrays before starting new screen objects in `design_catalog.json`.
-- ❌ **Unclosed Screen Objects**: Ensure that inside section arrays, every section object is properly closed with `}` before closing the `sections` array `]`.
-- ❌ **Desktop Canvas Rendering**: Never use bare `"Dashboard"` titles without specifying `Mobile Smartphone App Screen (Vertical 9:16 Portrait)`.
-- ❌ **Duplicate Navigation Bars**: Ensure `single_bottom_navigation_bar` or `locked_navigation_bar` includes the `anti_duplication_rule` directive.
-- ❌ **Hardcoded Colors in Catalog**: Never write `#FFFFFF` or `#000000` inside `design_catalog.json`. Always use `on_surface_high`, `surface_background`, etc.
+## 🚫 Zero Memory Logging Mandate
+- Memory updates during UI prompt compilation MUST sit inside `docs/04-ui-design/DESIGN-MEMORY.md` within the project workspace.
+- All approved screen prompts sit permanently inside `app-screens/prompts/`.
