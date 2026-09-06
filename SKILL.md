@@ -1,9 +1,9 @@
 ---
-name: ui-design-skill
+name: stitch-ui-skill
 description: End-to-end framework for extracting UI reference screens into color-agnostic JSON blueprints, maintaining brand design tokens & locked component specs, saving approved screen prompts to app-screens/, and compiling domain-adapted Google Stitch prompts with 9:16 mobile canvas guardrails.
 ---
 
-# UI Design Extraction & Google Stitch Prompt Compilation Skill
+# 🎨 Google Stitch UI Design & Prompt Compilation Skill (`stitch-ui-skill`)
 
 This skill defines the complete, 3-tier architecture and execution workflow for extracting reference UI screenshots, cataloging color-agnostic visual blueprints, applying brand themes, archiving approved screen prompts into `app-screens/`, and compiling domain-adapted Google Stitch prompts.
 
