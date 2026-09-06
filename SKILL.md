@@ -190,7 +190,8 @@ node stitch_formatter.js <category> <id> --domain="Target App Name"
 14. **Contextual Git Commit & User Approval Protocol**:
     - **User Confirmation Mandate**: The agent MUST NEVER run `git commit` or `git push` silently. The agent MUST propose the exact commit message and ask for explicit user approval before executing any Git action.
     - **Context-Specific Commit Messages**: Commit messages MUST specify the exact screens or rules modified (e.g. `feat(catalog): extract onboarding_nutrilens_v1 & 4 nutrition blueprints`, `docs(skill): add Rule 13 SVG registry protocol`).
-    - **Immediate `SKILL.md` Update Commit Workflow**: Whenever changes, corrections, or rule additions to `SKILL.md` are approved by the user, the agent MUST immediately propose a Git commit for `SKILL.md` to keep the master GitHub skill repository 100% up-to-date.
+    - **Dynamic Git Remote Target**: The agent MUST target the local repository's configured `origin` remote (resolving dynamically via `git remote get-url origin` inside the skill directory or project workspace).
+    - **Immediate `SKILL.md` Update Commit Workflow**: Whenever changes, corrections, or rule additions to `SKILL.md` are approved by the user, the agent MUST target the skill repository directory (e.g. `C:\Users\ADMIN\Desktop\stitch-ui-design-skill` or `.agents/skills/ui-design-skill`), propose a Git commit for `SKILL.md`, and ask for user approval before pushing to its `origin` remote.
 15. **Project-Scoped Persistent Memory Log Protocol (`MEMORY.md`)**:
     - **Local Workspace Scope**: Every project workspace MUST maintain a local `./MEMORY.md` file tracking app goals, active screen versions, design system locks, registered SVG icons, and user preferences.
     - **Auto-Bootstrapping**: If `./MEMORY.md` does not exist in a new project folder, the agent creates it using the template in `SKILL.md`.
