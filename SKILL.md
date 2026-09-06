@@ -245,17 +245,23 @@ Every app project workspace MUST maintain a clean, predictable folder tree:
 ├── app_theme.json           <── Local App Theme & Icon SVG Registry
 ├── design_catalog.json      <── Local Copy of Master Blueprint Library
 ├── stitch_formatter.js      <── Local Prompt Compiler Script
-└── app-screens/             <── Active Screen Prompt Files Directory
+└── app-screens/             <── Active Screen Prompts & Visual Screenshots Directory
     ├── README.md            <── Directory Index & Active Screen Manifest
-    ├── home_daily_quote_feed_v6.md
-    ├── explore_mindset_topics_v5.md
-    ├── saved_quotes_journal_v11.md
-    └── profile_streak_stats_settings_v6.md
+    ├── prompts/             <── Compiled Google Stitch Prompt Blueprints (.md)
+    │   ├── home_daily_quote_feed_v6.md
+    │   ├── explore_mindset_topics_v5.md
+    │   ├── saved_quotes_journal_v11.md
+    │   └── profile_streak_stats_settings_v6.md
+    └── images/              <── Rendered UI Screenshots (.png / .jpg)
+        ├── home_daily_quote_feed_v6.png
+        ├── explore_mindset_topics_v5.png
+        ├── saved_quotes_journal_v11.png
+        └── profile_streak_stats_settings_v6.png
 ```
 
 ### 3. File Bootstrapping & Organization Mandate:
 1. **Missing File Bootstrapping**: If `design_catalog.json`, `app_theme.json`, `stitch_formatter.js`, or `MEMORY.md` are missing from the project root, the agent automatically creates/copies them from the skill templates.
-2. **File Organization**: The agent MUST place all active screen prompt `.md` files inside `app-screens/`.
+2. **File Organization**: The agent MUST place all active screen prompt `.md` files inside `app-screens/prompts/` and link matching screenshot images in `app-screens/images/`.
 3. **Single Active File Enforcement**: The agent MUST delete archived screen versions per the Single Active File Overwrite Mandate and update `app-screens/README.md`.
 
 ---
